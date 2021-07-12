@@ -1,0 +1,19 @@
+package com.yug.startup.model;
+
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+import org.springframework.data.annotation.Id;
+
+@Getter @Setter
+@RequiredArgsConstructor
+@ToString
+public class AdminUser {
+
+    @Id
+    private Long adminUserId;
+    private String email;
+    private String password;
+}
