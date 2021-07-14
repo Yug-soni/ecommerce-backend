@@ -5,12 +5,13 @@ import com.yug.startup.service.AdminUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000/", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:3000/")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
@@ -22,9 +23,12 @@ public class AdminUserController {
     }
 
     @GetMapping("/")
-    public String home() {
-        this.adminUserService.getAdminUserList();
-        return "Work done successfully";
+    public ResponseEntity<List<AdminUser>> home() {
+        List<AdminUser> adminUserList = this.adminUserService.getAdminUserList();
+        return adminUserList != null ?
+                new ResponseEntity<>(adminUserList, HttpStatus.OK) :
+                new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK)
+                ;
     }
 
     @GetMapping("/insert-default-admin-user")
@@ -50,9 +54,13 @@ public class AdminUserController {
         return isSuccess ? "Default admin user updated successfully." : "Error updating the admin user";
     }
 
-    @GetMapping("/delete-default-admin-user")
-    public String deleteAdminUser() {
-        boolean isSuccess = this.adminUserService.deleteAdminUser(defaultEmail, defaultPassword);
-        return isSuccess ? "Default admin user deleted successfully." : "Error deleting the admin user.";
+    @DeleteMapping("/delete-default-admin-user")
+    public ResponseEntity<List<AdminUser>> deleteAdminUser(@RequestBody AdminUser adminUser) {
+        List<AdminUser> deletedAdminUser = this.adminUserService.deleteAdminUser(adminUser);
+        System.out.println(deletedAdminUser);
+        return deletedAdminUser != null ?
+                new ResponseEntity<>(deletedAdminUser, HttpStatus.OK) :
+                new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST)
+        ;
     }
 }
