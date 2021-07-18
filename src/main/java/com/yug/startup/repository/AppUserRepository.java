@@ -1,4 +1,4 @@
 package com.yug.startup.repository;
 
-public interface AdminUserRepository {
+public interface AppUserRepository {
 }

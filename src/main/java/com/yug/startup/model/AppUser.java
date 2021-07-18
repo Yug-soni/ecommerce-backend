@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 @Getter @Setter
 @RequiredArgsConstructor
 @ToString
-public class AdminUser {
+public class AppUser {
 
     @Id
     private Long id;

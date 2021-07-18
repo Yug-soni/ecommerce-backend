@@ -7,11 +7,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000/")
+@RequestMapping("/special/")
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
@@ -22,45 +22,51 @@ public class AdminUserController {
         this.adminUserService = adminUserService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/get")
     public ResponseEntity<List<AdminUser>> home() {
         List<AdminUser> adminUserList = this.adminUserService.getAdminUserList();
         return adminUserList != null ?
                 new ResponseEntity<>(adminUserList, HttpStatus.OK) :
-                new ResponseEntity<>(new ArrayList<>(), HttpStatus.OK)
+                new ResponseEntity<>(null, HttpStatus.NO_CONTENT)
                 ;
     }
 
-    @GetMapping("/insert-default-admin-user")
-    public ResponseEntity<AdminUser> insertAdminUser() {
-        boolean isSuccess = adminUserService.insertAdminUser(this.defaultEmail, this.defaultPassword);
+    @PostMapping("/insert")
+    public ResponseEntity<AdminUser> insertAdminUser(@RequestBody AdminUser adminUser) {
+        AdminUser arg = this.changeMe(adminUser);
+        boolean isSuccess = adminUserService.insertAdminUser(arg);
+        return isSuccess ?
+                new ResponseEntity<>(arg, HttpStatus.OK) :
+                new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
+    }
 
-        AdminUser adminUser = new AdminUser();
-        adminUser.setAdminUserId(0L);
-        adminUser.setEmail("email");
-        adminUser.setPassword("password");
+    @PostMapping("/update")
+    public ResponseEntity<AdminUser> updateAdminUser(@RequestBody AdminUser adminUser) {
+        AdminUser arg = this.changeMe(adminUser);
+        boolean isSuccess = this.adminUserService.updateAdminUser(arg);
 
         return isSuccess ?
-                new ResponseEntity<>( adminUser, HttpStatus.OK) :
-                new ResponseEntity<>(adminUser, HttpStatus.BAD_REQUEST);
+                new ResponseEntity<>(arg, HttpStatus.OK) :
+                new ResponseEntity<>(null, HttpStatus.NOT_FOUND)
+                ;
     }
 
-    @GetMapping("/update-default-admin-user")
-    public String updateAdminUser() {
-        String newEmail = "newEmail";
-        String newPassword = "newPassword";
-        boolean isSuccess = this.adminUserService.updateAdminUser(newEmail, newPassword, this.defaultEmail, this.defaultPassword);
-
-        return isSuccess ? "Default admin user updated successfully." : "Error updating the admin user";
+    @DeleteMapping("/delete")
+    public ResponseEntity<AdminUser> deleteAdminUser(@RequestBody AdminUser adminUser) {
+        AdminUser arg = this.changeMe(adminUser);
+        boolean isSuccess = arg != null && this.adminUserService.deleteAdminUser(arg);
+        return isSuccess ?
+                new ResponseEntity<>(arg, HttpStatus.OK) :
+                new ResponseEntity<>(null, HttpStatus.NOT_FOUND)
+                ;
     }
 
-    @DeleteMapping("/delete-default-admin-user")
-    public ResponseEntity<List<AdminUser>> deleteAdminUser(@RequestBody AdminUser adminUser) {
-        List<AdminUser> deletedAdminUser = this.adminUserService.deleteAdminUser(adminUser);
-        System.out.println(deletedAdminUser);
-        return deletedAdminUser != null ?
-                new ResponseEntity<>(deletedAdminUser, HttpStatus.OK) :
-                new ResponseEntity<>(new ArrayList<>(), HttpStatus.BAD_REQUEST)
-        ;
+    public AdminUser changeMe(AdminUser adminUser) {
+        AdminUser arg = new AdminUser();
+        arg.setId(adminUser.getId());
+        arg.setEmail(adminUser.getEmail());
+        arg.setPassword(adminUser.getPassword());
+
+        return arg;
     }
 }

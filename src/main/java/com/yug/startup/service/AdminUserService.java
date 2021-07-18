@@ -13,13 +13,15 @@ import java.util.List;
 public class AdminUserService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final AdminUserMapper adminUserMapper;
     private final String TABLE_NAME = "admin_user";
-    private final String ID = "admin_user_id";
+    private final String ID = "id";
     private final String EMAIL_FIELD = "email";
     private final String PASSWORD_FIELD = "password";
 
-    public AdminUserService(@Autowired JdbcTemplate jdbcTemplate) {
+    public AdminUserService(@Autowired JdbcTemplate jdbcTemplate, @Autowired AdminUserMapper adminUserMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.adminUserMapper = adminUserMapper;
     }
 
     public List<AdminUser> getAdminUserList() {
@@ -27,7 +29,7 @@ public class AdminUserService {
         List<AdminUser> adminUserList = null;
 
         try {
-            adminUserList = this.jdbcTemplate.query(sql, new AdminUserMapper());
+            adminUserList = this.jdbcTemplate.query(sql, this.adminUserMapper);
         } catch (DataAccessException e) {
             e.printStackTrace();
         }
@@ -35,10 +37,11 @@ public class AdminUserService {
         return adminUserList;
     }
 
-    public boolean insertAdminUser(String email, String password) {
+    public boolean insertAdminUser(AdminUser adminUser) {
         String sql = "INSERT INTO " + this.TABLE_NAME +
             " (" + this.EMAIL_FIELD + ", " + this.PASSWORD_FIELD + ") " +
-            " VALUES ('" + email + "', '" + password + "')";
+            " VALUES ('" + adminUser.getEmail() + "', '" + adminUser.getPassword() + "')";
+        if(this.userExists(adminUser)) return false;
         try {
             this.jdbcTemplate.execute(sql);
         } catch (DataAccessException e) {
@@ -48,13 +51,13 @@ public class AdminUserService {
         return true;
     }
 
-    public boolean updateAdminUser(String newEmail, String newPassword, String email, String password) {
+    public boolean updateAdminUser(AdminUser adminUser) {
         String sql = "UPDATE "+this.TABLE_NAME+
-                " SET "+this.EMAIL_FIELD+" = '"+newEmail+"', "+this.PASSWORD_FIELD+" = '"+newPassword+"' "+
-                " WHERE "+this.EMAIL_FIELD+" = '"+email+"' AND "+this.PASSWORD_FIELD+" = '"+password+"'; "
+                " SET "+this.EMAIL_FIELD+" = '"+adminUser.getEmail()+"', "+this.PASSWORD_FIELD+" = '"+adminUser.getPassword()+"' "+
+                " WHERE "+this.ID+" = "+adminUser.getId()+"; "
                 ;
         try {
-            this.jdbcTemplate.execute(sql);
+            this.jdbcTemplate.query(sql, this.adminUserMapper);
         } catch (DataAccessException e) {
             e.printStackTrace();
             return false;
@@ -62,17 +65,23 @@ public class AdminUserService {
         return true;
     }
 
-    public List<AdminUser> deleteAdminUser(AdminUser adminUser) {
+    public boolean deleteAdminUser(AdminUser adminUser) {
         String sql = "DELETE FROM "+this.TABLE_NAME+
-                " WHERE "+this.ID+" = "+adminUser.getAdminUserId()+";";
-        System.out.println(sql);
-        List<AdminUser> deletedAdminUser = null;
+                " WHERE "+this.ID+" = "+adminUser.getId()+";";
         try {
-            deletedAdminUser = this.jdbcTemplate.query(sql, new AdminUserMapper());
+            this.jdbcTemplate.query(sql, this.adminUserMapper);
         } catch (DataAccessException e) {
             e.printStackTrace();
-            return null;
+            return false;
         }
-        return deletedAdminUser;
+        return true;
+    }
+
+    private boolean userExists(AdminUser adminUser) {
+        String sql = "SELECT * FROM "+this.TABLE_NAME+
+                " WHERE "+this.EMAIL_FIELD+" = '"+adminUser.getEmail()+"' ;"
+                ;
+        List<AdminUser> list = jdbcTemplate.query(sql, this.adminUserMapper);
+        return list.size() > 0;
     }
 }
