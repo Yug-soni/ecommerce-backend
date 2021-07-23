@@ -15,8 +15,6 @@ import java.util.List;
 public class AdminUserController {
 
     private final AdminUserService adminUserService;
-    private final String defaultEmail = "defaultEmail";
-    private final String defaultPassword = "defaultPassword";
 
     public AdminUserController(@Autowired AdminUserService adminUserService) {
         this.adminUserService = adminUserService;
