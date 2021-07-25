@@ -27,7 +27,7 @@ public class DealsOfTheDayController {
     @GetMapping("")
     public ResponseEntity<List<DealsOfTheDay>> getDealsOfTheDayList() {
         List<DealsOfTheDay> list = service.getDealsOfTheDayList();
-        System.out.println(list);
+//        System.out.println(list);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 }
