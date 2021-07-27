@@ -33,7 +33,7 @@ public class AppUserService implements UserDetailsService {
     public String signUpUser(AppUser appUser) {
         boolean userExists = appUserRepository.findByEmail(appUser.getEmail())
                 .isPresent();
-        if (userExists) {
+        if (userExists && appUser.isEnabled()) {
             throw new IllegalStateException("email already taken.");
         }
 
@@ -42,8 +42,6 @@ public class AppUserService implements UserDetailsService {
         appUser.setPassword(encodedPassword);
 
         AppUser save = appUserRepository.save(appUser);
-
-        System.out.println(save);
 
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken = new ConfirmationToken(
