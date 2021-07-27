@@ -41,7 +41,11 @@ public class AppUserService implements UserDetailsService {
 
         appUser.setPassword(encodedPassword);
 
-        AppUser save = appUserRepository.save(appUser);
+        appUser = userExists ?
+                appUserRepository.findByEmail(appUser.getEmail()).get()
+                :
+                appUserRepository.save(appUser);
+
 
         String token = UUID.randomUUID().toString();
         ConfirmationToken confirmationToken = new ConfirmationToken(
