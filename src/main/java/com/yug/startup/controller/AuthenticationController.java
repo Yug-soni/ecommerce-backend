@@ -1,5 +1,7 @@
 package com.yug.startup.controller;
 
+import com.yug.startup.controller.token.ConfirmationTokenService;
+import com.yug.startup.email.EmailUtils;
 import com.yug.startup.model.ERole;
 import com.yug.startup.model.Role;
 import com.yug.startup.model.User;
@@ -37,6 +39,7 @@ public class AuthenticationController {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
+    private final EmailUtils emailUtils;
 
     @PostMapping("/sign-in")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -81,7 +84,9 @@ public class AuthenticationController {
         User user = new User(
                 signUpRequest.getUsername(),
                 signUpRequest.getEmail(),
-                passwordEncoder.encode(signUpRequest.getPassword())
+                passwordEncoder.encode(signUpRequest.getPassword()),
+                false,
+                false
         );
 
         Set<String> strRole = signUpRequest.getRole();
@@ -119,4 +124,15 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(new MessageResponse("User Registered Successfully."));
     }
+
+
+    @GetMapping(path = "/confirm")
+    public String confirm(@RequestParam("token") String token) {
+        return emailUtils.confirmToken(token);
+    }
+
+    private void sendMail(User user) {
+        String token =
+    }
+
 }

@@ -23,6 +23,8 @@ public class UserDetailsImplementation implements UserDetails {
     @JsonIgnore
     private String password;
     private Collection<? extends GrantedAuthority> authorities;
+    private boolean locked;
+    private boolean enabled;
 
     public static UserDetailsImplementation build(User user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName().name()))
@@ -33,7 +35,9 @@ public class UserDetailsImplementation implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                authorities
+                authorities,
+                user.getLocked(),
+                user.getEnabled()
         );
     }
 
@@ -69,6 +73,6 @@ public class UserDetailsImplementation implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return false;
     }
 }

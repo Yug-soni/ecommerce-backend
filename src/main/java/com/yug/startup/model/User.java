@@ -23,7 +23,15 @@ import java.util.Set;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name="user_sequence",
+            sequenceName = "user_sequence",
+            allocationSize = 1
+    )
+    @GeneratedValue(
+            strategy = GenerationType.SEQUENCE,
+            generator = "user_sequence"
+    )
     private Long id;
 
     @NotBlank
@@ -46,10 +54,14 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
+    private Boolean locked;
+    private Boolean enabled;
 
-    public User(String username, String email, String password) {
+    public User(String username, String email, String password, Boolean locked, Boolean enabled) {
         this.username = username;
         this.email = email;
         this.password = password;
+        this.locked = locked;
+        this.enabled = enabled;
     }
 }

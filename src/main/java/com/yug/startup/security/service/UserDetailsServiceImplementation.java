@@ -1,5 +1,6 @@
 package com.yug.startup.security.service;
 
+import com.yug.startup.controller.token.ConfirmationTokenService;
 import com.yug.startup.model.User;
 import com.yug.startup.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,7 @@ import javax.transaction.Transactional;
 public class UserDetailsServiceImplementation implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final ConfirmationTokenService confirmationTokenService;
 
     @Override
     @Transactional
