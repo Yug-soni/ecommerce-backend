@@ -4,16 +4,20 @@ import com.yug.startup.controller.token.ConfirmationToken;
 import com.yug.startup.controller.token.ConfirmationTokenService;
 import com.yug.startup.model.User;
 import com.yug.startup.repository.UserRepository;
+import com.yug.startup.security.service.UserDetailsServiceImplementation;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Component
 @AllArgsConstructor
 public class EmailUtils {
 
     private final ConfirmationTokenService confirmationTokenService;
+    private final UserDetailsServiceImplementation userDetailsServiceImplementation;
     private final EmailSender emailSender;
     private final UserRepository userRepository;
 
@@ -53,8 +57,8 @@ public class EmailUtils {
         }
 
         confirmationTokenService.setConfirmedAt(token);
-        userRepository.enableAppUser(
-                confirmationToken.getAppUser().getEmail());
+        userDetailsServiceImplementation.enableUser(
+                confirmationToken.getUser().getEmail());
         return "confirmed";
     }
 

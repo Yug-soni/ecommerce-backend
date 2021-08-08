@@ -13,6 +13,7 @@ import com.yug.startup.repository.RoleRepository;
 import com.yug.startup.repository.UserRepository;
 import com.yug.startup.security.jwt.JwtUtils;
 import com.yug.startup.security.service.UserDetailsImplementation;
+import com.yug.startup.security.service.UserDetailsServiceImplementation;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,6 +37,7 @@ import java.util.stream.Collectors;
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
+    private final UserDetailsServiceImplementation userDetailsServiceImplementation;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
@@ -69,13 +71,13 @@ public class AuthenticationController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+        if (!userDetailsServiceImplementation.checkUserByUsername(signUpRequest.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Username is already taken!"));
         }
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+        if (!userDetailsServiceImplementation.checkUserByEmail(signUpRequest.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponse("Error: Email is already in use!"));
@@ -122,17 +124,15 @@ public class AuthenticationController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User Registered Successfully."));
+        String token = emailUtils.sendMail(user);
+
+        return ResponseEntity.ok(new MessageResponse("User Registered Successfully and confirmation token is :- "+token));
     }
 
 
     @GetMapping(path = "/confirm")
     public String confirm(@RequestParam("token") String token) {
         return emailUtils.confirmToken(token);
-    }
-
-    private void sendMail(User user) {
-        String token =
     }
 
 }
